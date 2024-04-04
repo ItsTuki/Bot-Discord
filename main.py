@@ -28,4 +28,4 @@ async def on_message(message):
     else:
         await message.channel.send(message.content)
 
-client.run("MTIyNTIzMTc5MDE5NzcwNjkxNQ.G3m2Qt.ZHnc0EKrGOhQGlrA9y5q6jZ_pEWGKsh_AM--_A")
+client.run("Token Aqui we")
