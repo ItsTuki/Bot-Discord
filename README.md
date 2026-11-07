@@ -12,8 +12,6 @@ Bot de Discord muy básico escrito en Python con `discord.py`. Fue mi primer bot
 | `!moneda` | Lanza una moneda (cara o cruz). |
 | Cualquier otro texto | Lo repite tal cual (modo eco). |
 
-> **Nota:** `!moneda` usa la función `flip_coin()`, que no está en `bot_logic.py` de este repo (sí está en [test](https://github.com/ItsTuki/test)). Hay que copiarla para que el comando funcione.
-
 ## Requisitos
 
 - Python 3.8 o superior
@@ -37,5 +35,5 @@ python main.py
 
 ```
 main.py       # eventos del bot y respuestas
-bot_logic.py  # generador de contraseñas
+bot_logic.py  # generador de contraseñas y cara o cruz
 ```
