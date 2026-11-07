@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.itstuki</groupId>
     <artifactId>TukiBot</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <name>TukiBot</name>
     <description>Bot de música para Discord de ItsTuki, basado en JMusicBot (jagrosh) y migrado a JDA 6 + DAVE.</description>

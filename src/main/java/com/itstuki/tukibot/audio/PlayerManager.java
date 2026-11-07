@@ -35,6 +35,8 @@ import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.itstuki.tukibot.ytdlp.YtDlp;
+import com.itstuki.tukibot.ytdlp.YtDlpSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
 import dev.lavalink.youtube.YoutubeSourceOptions;
 import dev.lavalink.youtube.clients.*;
@@ -58,6 +60,7 @@ public class PlayerManager extends DefaultAudioPlayerManager
     private final Bot bot;
     private final Map<String, CachedSearch> searchCache = new ConcurrentHashMap<>();
     private YoutubeAudioSourceManager youtube;
+    private YtDlpSourceManager ytdlp;
 
     public PlayerManager(Bot bot)
     {
@@ -71,6 +74,10 @@ public class PlayerManager extends DefaultAudioPlayerManager
 
         youtube = createYoutubeSource(config);
         registerSourceManager(youtube);
+
+        YtDlp ytdlpTool = new YtDlp(config);
+        ytdlp = new YtDlpSourceManager(ytdlpTool);
+        ytdlpTool.init(bot.getThreadpool());
 
         registerSourceManager(SoundCloudAudioSourceManager.createDefault());
         registerSourceManager(new BandcampAudioSourceManager());
@@ -149,6 +156,23 @@ public class PlayerManager extends DefaultAudioPlayerManager
     public YoutubeAudioSourceManager getYoutube()
     {
         return youtube;
+    }
+
+    /**
+     * Prepara una pista antes de reproducirla: las de YouTube pasan a
+     * reproducirse con yt-dlp (si está listo), con youtube-source de respaldo.
+     */
+    public AudioTrack prepare(AudioTrack track)
+    {
+        if(track != null && ytdlp != null && ytdlp.getYtDlp().isReady() && track.getSourceManager() == youtube)
+        {
+            AudioTrack wrapped = ytdlp.wrap(track);
+            wrapped.setUserData(track.getUserData());
+            if(track.getPosition() > 0)
+                wrapped.setPosition(track.getPosition());
+            return wrapped;
+        }
+        return track;
     }
 
     public boolean hasHandler(Guild guild)

@@ -73,14 +73,13 @@ Consejo para probar: pon el ID de tu servidor en `devguild` y los comandos apare
 
 ## YouTube
 
-YouTube bloquea cada vez más a los bots. Si al reproducir aparece *"This video requires login"* (pasa sobre todo en servidores en la nube):
+YouTube cambia sus protecciones contra bots casi cada semana, así que TukiBot usa varias capas:
 
-1. Primero asegúrate de tener la última versión: el bot descifra las firmas de YouTube con el servidor público yt-cipher (opción `youtube.remotecipher`, vacío = servidor público).
-2. Si aún falla, en `config.txt` pon `youtube { oauth = true }` y reinicia.
-3. La consola mostrará un código: entra a **google.com/device** e ingrésalo con una **cuenta de Google secundaria** (nunca la principal).
-4. Listo: el bot guarda solo el *refresh token* en `config.txt` para las próximas veces.
+1. **yt-dlp (por defecto):** el audio de YouTube se obtiene con [yt-dlp](https://github.com/yt-dlp/yt-dlp), que se actualiza constantemente. La primera vez que inicias el bot descarga solo `yt-dlp` y [Deno](https://deno.com) (el runtime de JavaScript que yt-dlp necesita para YouTube) en la carpeta `bin`, y mantiene yt-dlp al día. Si ya los tienes instalados, usa los tuyos.
+2. **Respaldo interno:** si yt-dlp falla, se intenta con youtube-source, que descifra las firmas con el servidor público yt-cipher (`youtube.remotecipher`; vacío = servidor público).
+3. **Si YouTube sigue pidiendo iniciar sesión:** exporta las cookies de una **cuenta de Google secundaria** a un `cookies.txt` y pon su ruta en `youtube.cookies`, o activa `youtube.oauth = true` y sigue las instrucciones de la consola (código en google.com/device).
 
-Las búsquedas y sugerencias de YouTube funcionan sin iniciar sesión.
+Las búsquedas y sugerencias de YouTube funcionan sin iniciar sesión. Para desactivar yt-dlp: `youtube { ytdlp = false }`.
 
 ## Estructura
 
@@ -93,6 +92,7 @@ src/main/java/com/itstuki/tukibot/
   interactions/         botones, menú contextual y respuestas de texto
   music/                carga de canciones, acciones compartidas, autocompletado
   ui/Panels.java        paneles Components V2
+  ytdlp/                reproducción de YouTube con yt-dlp
   fun/BotLogic.java     gen_pass y flip_coin del bot original
   lyrics/               cliente de LRCLIB
   queue/, playlist/, settings/, utils/, gui/   (heredados de JMusicBot)
@@ -107,6 +107,6 @@ src/main/java/com/itstuki/tukibot/
 
 Basado en [JMusicBot](https://github.com/jagrosh/MusicBot) de John Grosh (jagrosh) y sus contribuidores, bajo la [Licencia Apache 2.0](LICENSE). Los cambios están descritos en [NOTICE](NOTICE).
 
-Usa [JDA](https://github.com/discord-jda/JDA), [JDAVE](https://github.com/MinnDevelopment/jdave), [Lavaplayer](https://github.com/lavalink-devs/lavaplayer), [youtube-source](https://github.com/lavalink-devs/youtube-source) y [LRCLIB](https://lrclib.net).
+Usa [JDA](https://github.com/discord-jda/JDA), [yt-dlp](https://github.com/yt-dlp/yt-dlp), [JDAVE](https://github.com/MinnDevelopment/jdave), [Lavaplayer](https://github.com/lavalink-devs/lavaplayer), [youtube-source](https://github.com/lavalink-devs/youtube-source) y [LRCLIB](https://lrclib.net).
 
 La primera versión de este repo (el bot en Python) sigue disponible en el historial de commits.

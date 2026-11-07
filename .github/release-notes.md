@@ -1,15 +1,14 @@
-## Arreglo: YouTube no reproducía
+## YouTube con yt-dlp
 
-YouTube cambió su reproductor y la librería ya no lograba descifrar las firmas de los videos (`must find sig function`), así que las canciones se cargaban pero no sonaban.
+YouTube agregó otra protección (los audios respondían `403` y los clientes de TV pedían "Sign in to confirm you're not a bot"), que la librería de Java aún no resuelve. Esta versión reproduce YouTube con **yt-dlp**, la herramienta que mejor sigue los cambios de YouTube.
 
-- Las firmas ahora se descifran con el servidor público **yt-cipher** (`https://cipher.kikkia.dev/`), el que recomiendan los autores de youtube-source. Funciona sin tocar nada: un `remotecipher` vacío en `config.txt` usa ese servidor. Puedes poner la URL de uno propio o `none` para volver al descifrado local.
-- Nuevo orden de los métodos de YouTube (MWEB y WEB primero); con OAuth, los clientes de TV van después de los web, como recomiendan los autores.
+- La primera vez que inicias el bot, descarga solo **yt-dlp** y **Deno** (el runtime de JavaScript que yt-dlp necesita) en la carpeta `bin` y revisa cada día si hay una versión nueva de yt-dlp. Si ya los tienes instalados, usa los tuyos.
+- Si yt-dlp falla, el bot vuelve a intentar con el método interno (youtube-source + yt-cipher).
+- Opciones nuevas en `youtube { ... }`: `ytdlp` (activar/desactivar), `ytdlppath` (tu propio yt-dlp) y `cookies` (archivo cookies.txt de una cuenta secundaria, por si YouTube sigue pidiendo iniciar sesión).
+- La miniatura, el título y los controles del panel funcionan igual.
 
 ### Actualizar
-Reemplaza `TukiBot.jar` por el de esta release y reinicia el bot. Tu `config.txt` sigue sirviendo.
-
-### Si aún falla
-Activa `oauth = true` dentro de `youtube { ... }` en `config.txt`, reinicia y sigue las instrucciones de la consola con una cuenta de Google secundaria.
+Reemplaza `TukiBot.jar` y reinicia. La primera vez verás en la consola "Descargando yt-dlp…" y "Descargando Deno…" (unos 60 MB en total) y luego "yt-dlp listo".
 
 ---
 Requiere **Java 25** de 64 bits: https://adoptium.net/temurin/releases/?version=25 · Más detalles en el [README](https://github.com/ItsTuki/Bot-Discord#readme).

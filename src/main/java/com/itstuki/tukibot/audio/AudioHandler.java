@@ -80,8 +80,15 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
         queue = type.createInstance(queue);
     }
 
+    private QueuedTrack prepare(QueuedTrack qtrack)
+    {
+        AudioTrack prepared = manager.prepare(qtrack.getTrack());
+        return prepared == qtrack.getTrack() ? qtrack : new QueuedTrack(prepared, qtrack.getRequestMetadata());
+    }
+
     public int addTrackToFront(QueuedTrack qtrack)
     {
+        qtrack = prepare(qtrack);
         if(audioPlayer.getPlayingTrack()==null)
         {
             audioPlayer.playTrack(qtrack.getTrack());
@@ -96,6 +103,7 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
 
     public int addTrack(QueuedTrack qtrack)
     {
+        qtrack = prepare(qtrack);
         if(audioPlayer.getPlayingTrack()==null)
         {
             audioPlayer.playTrack(qtrack.getTrack());
@@ -175,8 +183,9 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
         Playlist pl = manager.getBot().getPlaylistLoader().getPlaylist(settings.getDefaultPlaylist());
         if(pl==null || pl.getItems().isEmpty())
             return false;
-        pl.loadTracks(manager, (at) ->
+        pl.loadTracks(manager, (loaded) ->
         {
+            AudioTrack at = manager.prepare(loaded);
             if(audioPlayer.getPlayingTrack()==null)
                 audioPlayer.playTrack(at);
             else

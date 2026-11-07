@@ -17,3 +17,7 @@ Playlists/
 .classpath
 nbproject/
 __pycache__/
+
+# Herramientas que descarga el bot (yt-dlp, Deno)
+bin/
+cookies.txt
