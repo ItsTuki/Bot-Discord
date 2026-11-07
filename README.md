@@ -53,7 +53,7 @@ JMusicBot ya no podía entrar a canales de voz: desde el 1 de marzo de 2026 Disc
 3. Invita al bot con el enlace que aparece en la consola al iniciarlo (ya trae los permisos necesarios).
 
 ### 3. Descargar o compilar
-- **Descargar**: en la pestaña *Actions* del repo, abre la última compilación y baja el artefacto **TukiBot** (trae `TukiBot.jar` y los scripts).
+- **Descargar**: baja `TukiBot.jar` (o el `.zip` con los scripts) desde la última [release](https://github.com/ItsTuki/Bot-Discord/releases/latest).
 - **Compilar tú mismo** (necesitas Maven):
   ```bash
   mvn package
