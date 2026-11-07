@@ -42,7 +42,7 @@ public class BotConfig
     private Path path = null;
     private String token, playlistsFolder, logLevel, twitch,
             successEmoji, warningEmoji, errorEmoji, loadingEmoji, searchingEmoji,
-            ytRefreshToken, ytRemoteCipher, ytRemoteCipherPassword, ytdlpPath, ytCookies;
+            ytRefreshToken, ytRemoteCipher, ytRemoteCipherPassword, ytdlpPath, ytCookies, ytCookiesBrowser;
     private boolean stayInChannel, songInGame, npImages, vcStatus, npAuto, autocomplete,
             textResponses, ytOauth, ytdlp;
     private long owner, maxSeconds, aloneTimeUntilStop, devGuild;
@@ -104,6 +104,7 @@ public class BotConfig
             ytdlp = config.getBoolean("youtube.ytdlp");
             ytdlpPath = config.getString("youtube.ytdlppath").trim();
             ytCookies = config.getString("youtube.cookies").trim();
+            ytCookiesBrowser = config.getString("youtube.cookiesfrombrowser").trim();
 
             boolean write = false;
 
@@ -250,6 +251,7 @@ public class BotConfig
     public boolean useYtDlp() { return ytdlp; }
     public String getYtDlpPath() { return ytdlpPath.isEmpty() ? null : ytdlpPath; }
     public String getYoutubeCookies() { return ytCookies.isEmpty() ? null : ytCookies; }
+    public String getYoutubeCookiesBrowser() { return ytCookiesBrowser.isEmpty() ? null : ytCookiesBrowser; }
 
     /** Servidor yt-cipher público recomendado por los autores de youtube-source. */
     public static final String DEFAULT_REMOTE_CIPHER = "https://cipher.kikkia.dev/";

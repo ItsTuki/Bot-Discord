@@ -95,7 +95,7 @@ public class NowplayingHandler
             lastNP.remove(guildId);
             return;
         }
-        boolean playing = handler.isMusicPlaying(bot.getJDA());
+        boolean playing = handler.getPlayer().getPlayingTrack() != null;
         MessageCreateData data = playing ? Panels.nowPlaying(bot, guild, handler) : Panels.noMusic(bot, guild, handler);
         if(!playing)
             lastNP.remove(guildId);

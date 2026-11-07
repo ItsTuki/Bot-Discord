@@ -77,7 +77,7 @@ YouTube cambia sus protecciones contra bots casi cada semana, así que TukiBot u
 
 1. **yt-dlp (por defecto):** el audio de YouTube se obtiene con [yt-dlp](https://github.com/yt-dlp/yt-dlp), que se actualiza constantemente. La primera vez que inicias el bot descarga solo `yt-dlp` y [Deno](https://deno.com) (el runtime de JavaScript que yt-dlp necesita para YouTube) en la carpeta `bin`, y mantiene yt-dlp al día. Si ya los tienes instalados, usa los tuyos.
 2. **Respaldo interno:** si yt-dlp falla, se intenta con youtube-source, que descifra las firmas con el servidor público yt-cipher (`youtube.remotecipher`; vacío = servidor público).
-3. **Si YouTube sigue pidiendo iniciar sesión:** exporta las cookies de una **cuenta de Google secundaria** a un `cookies.txt` y pon su ruta en `youtube.cookies`, o activa `youtube.oauth = true` y sigue las instrucciones de la consola (código en google.com/device).
+3. **Si algún video responde "Sign in to confirm you're not a bot":** pon en `config.txt` `youtube { cookiesfrombrowser = "firefox" }` (o `chrome`, `edge`, `brave`; Chrome y Edge deben estar cerrados) para que yt-dlp use tu sesión de YouTube de ese navegador, o exporta un `cookies.txt` y pon su ruta en `youtube.cookies`. Mejor si es una **cuenta de Google secundaria**.
 
 Las búsquedas y sugerencias de YouTube funcionan sin iniciar sesión. Para desactivar yt-dlp: `youtube { ytdlp = false }`.
 

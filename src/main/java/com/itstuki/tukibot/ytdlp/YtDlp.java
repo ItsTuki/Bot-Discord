@@ -256,6 +256,8 @@ public class YtDlp
             cmd.addAll(List.of("--js-runtimes", "deno:" + deno));
         if(config.getYoutubeCookies() != null)
             cmd.addAll(List.of("--cookies", config.getYoutubeCookies()));
+        else if(config.getYoutubeCookiesBrowser() != null)
+            cmd.addAll(List.of("--cookies-from-browser", config.getYoutubeCookiesBrowser()));
         cmd.add(videoUrl);
 
         Result r = run(cmd, 60);
@@ -291,6 +293,8 @@ public class YtDlp
             cmd.addAll(List.of("--js-runtimes", "deno:" + deno));
         if(config.getYoutubeCookies() != null)
             cmd.addAll(List.of("--cookies", config.getYoutubeCookies()));
+        else if(config.getYoutubeCookiesBrowser() != null)
+            cmd.addAll(List.of("--cookies-from-browser", config.getYoutubeCookiesBrowser()));
         cmd.add(videoUrl);
 
         ProcessBuilder pb = new ProcessBuilder(cmd);

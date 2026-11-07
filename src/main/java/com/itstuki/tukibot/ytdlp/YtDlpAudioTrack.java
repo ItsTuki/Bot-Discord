@@ -18,6 +18,7 @@ package com.itstuki.tukibot.ytdlp;
 import com.sedmelluq.discord.lavaplayer.container.matroska.MatroskaAudioTrack;
 import com.sedmelluq.discord.lavaplayer.container.mpeg.MpegAudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import com.sedmelluq.discord.lavaplayer.track.DelegatedAudioTrack;
@@ -58,8 +59,17 @@ public class YtDlpAudioTrack extends DelegatedAudioTrack
             LOG.warn("yt-dlp no pudo obtener " + trackInfo.identifier + ": " + e.getMessage()
                     + (fallback != null ? " — probando con el método interno." : ""));
             if(fallback == null)
-                throw e;
-            processDelegate((InternalAudioTrack) fallback.makeClone(), executor);
+                throw new FriendlyException("yt-dlp: " + e.getMessage(), FriendlyException.Severity.COMMON, e);
+            try
+            {
+                processDelegate((InternalAudioTrack) fallback.makeClone(), executor);
+            }
+            catch(Exception fallbackError)
+            {
+                // se muestra el error de yt-dlp, que suele explicar mejor qué pasó
+                throw new FriendlyException("YouTube no entregó el audio. yt-dlp dijo: " + shortError(e.getMessage()),
+                        FriendlyException.Severity.COMMON, fallbackError);
+            }
             return;
         }
 
@@ -71,6 +81,17 @@ public class YtDlpAudioTrack extends DelegatedAudioTrack
                     : new MpegAudioTrack(trackInfo, download);
             processDelegate(delegate, executor);
         }
+    }
+
+    private static String shortError(String msg)
+    {
+        if(msg == null)
+            return "error desconocido";
+        String m = msg.replaceFirst("^ERROR: \\[youtube\\] [\\w-]+: ", "");
+        int cut = m.indexOf(". Use --cookies");
+        if(cut > 0)
+            m = m.substring(0, cut + 1);
+        return m.length() > 300 ? m.substring(0, 299) + "…" : m;
     }
 
     @Override

@@ -241,11 +241,12 @@ public class AudioHandler extends AudioEventAdapter implements AudioSendHandler
         String hint = "";
         boolean loginRequired = false;
         for(Throwable t = exception; t != null; t = t.getCause())
-            if(t.getMessage() != null && (t.getMessage().contains("requires login") || t.getMessage().contains("Sign in")))
+            if(t.getMessage() != null && (t.getMessage().contains("requires login") || t.getMessage().contains("Sign in")
+                    || t.getMessage().contains("not a bot")))
                 loginRequired = true;
         if(loginRequired && "youtube".equals(track.getSourceManager() == null ? null : track.getSourceManager().getSourceName())
-                && !manager.getBot().getConfig().useYoutubeOauth())
-            hint = "\n-# YouTube está pidiendo iniciar sesión. El dueño del bot puede activar `youtube.oauth = true` en config.txt (ver README).";
+                && manager.getBot().getConfig().getYoutubeCookies() == null && manager.getBot().getConfig().getYoutubeCookiesBrowser() == null)
+            hint = "\n-# YouTube está pidiendo iniciar sesión para este video. El dueño del bot puede configurar `youtube.cookiesfrombrowser` o `youtube.cookies` (ver README).";
         manager.getBot().getNowplayingHandler().announce(guildId, manager.getBot().getConfig().getError()
                 + " No se pudo reproducir **" + FormatUtil.escape(track.getInfo().title) + "**"
                 + (exception.severity == FriendlyException.Severity.COMMON ? ": " + exception.getMessage() : ".") + hint);

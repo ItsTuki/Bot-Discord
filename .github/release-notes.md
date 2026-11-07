@@ -1,11 +1,8 @@
-## Arreglo: 403 al reproducir YouTube con yt-dlp
+## Mejoras para YouTube
 
-En la 1.1.0, yt-dlp obtenía el enlace del audio pero YouTube rechazaba la descarga hecha por el bot (`403`), porque cada enlace queda atado a los encabezados y tokens que usó yt-dlp.
-
-- Ahora **yt-dlp también descarga el audio** a un archivo temporal en `bin/cache` y el bot lo va reproduciendo mientras baja (empieza a sonar en menos de un segundo después de que yt-dlp obtiene el enlace).
-- Se puede adelantar con `/seek` dentro de lo ya descargado (yt-dlp baja mucho más rápido que el tiempo real).
-- Los archivos temporales se borran al terminar cada canción y al iniciar el bot.
-- Si yt-dlp falla, se intenta con el método interno.
+- **Mensajes de error claros:** si YouTube no entrega el audio de un video, el bot muestra en Discord lo que respondió YouTube (por ejemplo "Sign in to confirm you're not a bot") en vez de un error genérico.
+- **Cookies del navegador:** nueva opción `youtube.cookiesfrombrowser` (`firefox`, `chrome`, `edge`, `brave`...) para que yt-dlp use tu sesión de YouTube cuando algún video lo exige. También sigue existiendo `youtube.cookies` para un archivo `cookies.txt`.
+- **Panel:** ya no dice "No hay música sonando" mientras el bot todavía se está conectando al canal de voz.
 
 ### Actualizar
 Reemplaza `TukiBot.jar` y reinicia.

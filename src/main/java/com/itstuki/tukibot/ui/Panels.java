@@ -78,7 +78,8 @@ public final class Panels
     public static MessageCreateData nowPlaying(Bot bot, Guild guild, AudioHandler handler)
     {
         AudioTrack track = handler.getPlayer().getPlayingTrack();
-        if(track == null || !handler.isMusicPlaying(guild.getJDA()))
+        // no se exige estar conectado: al empezar una canción la conexión de voz puede tardar un poco
+        if(track == null)
             return noMusic(bot, guild, handler);
 
         Settings settings = bot.getSettingsManager().getSettings(guild);
