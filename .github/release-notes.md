@@ -1,14 +1,14 @@
-## YouTube con yt-dlp
+## Arreglo: 403 al reproducir YouTube con yt-dlp
 
-YouTube agregó otra protección (los audios respondían `403` y los clientes de TV pedían "Sign in to confirm you're not a bot"), que la librería de Java aún no resuelve. Esta versión reproduce YouTube con **yt-dlp**, la herramienta que mejor sigue los cambios de YouTube.
+En la 1.1.0, yt-dlp obtenía el enlace del audio pero YouTube rechazaba la descarga hecha por el bot (`403`), porque cada enlace queda atado a los encabezados y tokens que usó yt-dlp.
 
-- La primera vez que inicias el bot, descarga solo **yt-dlp** y **Deno** (el runtime de JavaScript que yt-dlp necesita) en la carpeta `bin` y revisa cada día si hay una versión nueva de yt-dlp. Si ya los tienes instalados, usa los tuyos.
-- Si yt-dlp falla, el bot vuelve a intentar con el método interno (youtube-source + yt-cipher).
-- Opciones nuevas en `youtube { ... }`: `ytdlp` (activar/desactivar), `ytdlppath` (tu propio yt-dlp) y `cookies` (archivo cookies.txt de una cuenta secundaria, por si YouTube sigue pidiendo iniciar sesión).
-- La miniatura, el título y los controles del panel funcionan igual.
+- Ahora **yt-dlp también descarga el audio** a un archivo temporal en `bin/cache` y el bot lo va reproduciendo mientras baja (empieza a sonar en menos de un segundo después de que yt-dlp obtiene el enlace).
+- Se puede adelantar con `/seek` dentro de lo ya descargado (yt-dlp baja mucho más rápido que el tiempo real).
+- Los archivos temporales se borran al terminar cada canción y al iniciar el bot.
+- Si yt-dlp falla, se intenta con el método interno.
 
 ### Actualizar
-Reemplaza `TukiBot.jar` y reinicia. La primera vez verás en la consola "Descargando yt-dlp…" y "Descargando Deno…" (unos 60 MB en total) y luego "yt-dlp listo".
+Reemplaza `TukiBot.jar` y reinicia.
 
 ---
 Requiere **Java 25** de 64 bits: https://adoptium.net/temurin/releases/?version=25 · Más detalles en el [README](https://github.com/ItsTuki/Bot-Discord#readme).

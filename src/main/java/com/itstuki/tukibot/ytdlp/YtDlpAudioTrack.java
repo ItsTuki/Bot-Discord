@@ -18,16 +18,11 @@ package com.itstuki.tukibot.ytdlp;
 import com.sedmelluq.discord.lavaplayer.container.matroska.MatroskaAudioTrack;
 import com.sedmelluq.discord.lavaplayer.container.mpeg.MpegAudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManager;
-import com.sedmelluq.discord.lavaplayer.tools.Units;
-import com.sedmelluq.discord.lavaplayer.tools.io.HttpInterface;
-import com.sedmelluq.discord.lavaplayer.tools.io.PersistentHttpStream;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import com.sedmelluq.discord.lavaplayer.track.DelegatedAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.InternalAudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.LocalAudioTrackExecutor;
-import java.net.URI;
-import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,10 +47,11 @@ public class YtDlpAudioTrack extends DelegatedAudioTrack
     @Override
     public void process(LocalAudioTrackExecutor executor) throws Exception
     {
-        YtDlp.Stream stream;
+        YtDlpDownload download;
         try
         {
-            stream = sourceManager.getYtDlp().resolve(trackInfo.uri);
+            download = sourceManager.getYtDlp().download(trackInfo.uri);
+            download.awaitStart(60_000);
         }
         catch(Exception e)
         {
@@ -67,22 +63,12 @@ public class YtDlpAudioTrack extends DelegatedAudioTrack
             return;
         }
 
-        try(HttpInterface httpInterface = sourceManager.getHttpInterface())
+        try(download)
         {
-            PersistentHttpStream input = new PersistentHttpStream(httpInterface, new URI(stream.url()), Units.CONTENT_LENGTH_UNKNOWN)
-            {
-                @Override
-                protected HttpGet getConnectRequest()
-                {
-                    HttpGet get = super.getConnectRequest();
-                    if(stream.userAgent() != null)
-                        get.setHeader("User-Agent", stream.userAgent());
-                    return get;
-                }
-            };
-            InternalAudioTrack delegate = "webm".equalsIgnoreCase(stream.ext()) || "weba".equalsIgnoreCase(stream.ext())
-                    ? new MatroskaAudioTrack(trackInfo, input)
-                    : new MpegAudioTrack(trackInfo, input);
+            String ext = download.getExt();
+            InternalAudioTrack delegate = "webm".equalsIgnoreCase(ext) || "weba".equalsIgnoreCase(ext) || "mkv".equalsIgnoreCase(ext)
+                    ? new MatroskaAudioTrack(trackInfo, download)
+                    : new MpegAudioTrack(trackInfo, download);
             processDelegate(delegate, executor);
         }
     }

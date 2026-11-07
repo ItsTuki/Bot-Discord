@@ -50,6 +50,7 @@ public class YtDlp
 
     private final BotConfig config;
     private final Path binDir = OtherUtil.getPath("bin");
+    private final Path cacheDir = OtherUtil.getPath("bin").resolve("cache");
     private final boolean windows = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
     private final boolean mac = System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("mac");
     private final boolean arm = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT).matches(".*(aarch64|arm64).*");
@@ -102,6 +103,12 @@ public class YtDlp
     private void setup() throws IOException, InterruptedException
     {
         Files.createDirectories(binDir);
+        Files.createDirectories(cacheDir);
+        // restos de una ejecución anterior
+        try(var files = Files.list(cacheDir))
+        {
+            files.forEach(f -> { try { Files.deleteIfExists(f); } catch(IOException ignored) {} });
+        }
 
         // yt-dlp: ruta del config, carpeta bin, o PATH del sistema
         String custom = config.getYtDlpPath();
@@ -261,6 +268,74 @@ public class YtDlp
         String[] parts = line.split("\\|", 3);
         String ua = parts[1].equals("NA") ? null : parts[1];
         return new Stream(parts[2].trim(), parts[0].trim(), ua);
+    }
+
+    /**
+     * Hace que yt-dlp descargue el audio a un archivo temporal y lo devuelve
+     * como stream que se puede leer mientras baja. yt-dlp se encarga de todos
+     * los encabezados y tokens que YouTube exige.
+     */
+    public YtDlpDownload download(String videoUrl) throws IOException, InterruptedException
+    {
+        if(!isReady())
+            throw new IOException("yt-dlp no está disponible");
+        Files.createDirectories(cacheDir);
+        Path file = cacheDir.resolve(UUID.randomUUID() + ".audio");
+        List<String> cmd = new ArrayList<>(List.of(ytdlp,
+                "--no-playlist", "--no-warnings", "--no-progress", "--ignore-config",
+                "--no-part", "--no-mtime", "--no-cache-dir", "--force-overwrites",
+                "-f", FORMAT,
+                "--print", "before_dl:%(ext)s",
+                "-o", file.toAbsolutePath().toString()));
+        if(deno != null)
+            cmd.addAll(List.of("--js-runtimes", "deno:" + deno));
+        if(config.getYoutubeCookies() != null)
+            cmd.addAll(List.of("--cookies", config.getYoutubeCookies()));
+        cmd.add(videoUrl);
+
+        ProcessBuilder pb = new ProcessBuilder(cmd);
+        if(deno != null)
+        {
+            String path = System.getenv().getOrDefault(windows ? "Path" : "PATH", "");
+            pb.environment().put(windows ? "Path" : "PATH", binDir.toAbsolutePath() + File.pathSeparator + path);
+        }
+        Process p = pb.start();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        Thread.ofVirtual().start(() -> copy(p.getErrorStream(), err));
+
+        // la primera línea es la extensión, que se imprime justo antes de descargar
+        BufferedReader out = new BufferedReader(new InputStreamReader(p.getInputStream(), StandardCharsets.UTF_8));
+        java.util.concurrent.CompletableFuture<String> extFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+            try
+            {
+                String line = out.readLine();
+                Thread.ofVirtual().start(() -> copy(p.getInputStream(), OutputStream.nullOutputStream()));
+                return line == null ? null : line.trim();
+            }
+            catch(IOException e)
+            {
+                return null;
+            }
+        }, java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor());
+        String ext;
+        try
+        {
+            ext = extFuture.get(60, TimeUnit.SECONDS);
+        }
+        catch(java.util.concurrent.ExecutionException | java.util.concurrent.TimeoutException e)
+        {
+            ext = null;
+        }
+        if(ext == null || ext.isEmpty())
+        {
+            p.destroyForcibly();
+            p.waitFor(5, TimeUnit.SECONDS);
+            String msg = err.toString(StandardCharsets.UTF_8).lines().filter(l -> l.startsWith("ERROR")).findFirst()
+                    .orElse("yt-dlp no pudo obtener el audio");
+            Files.deleteIfExists(file);
+            throw new IOException(msg);
+        }
+        return new YtDlpDownload(p, file, ext, err);
     }
 
     private record Result(int exit, String out, String err) {}
