@@ -1,39 +1,106 @@
-# Bot-Discord
+# TukiBot
 
-Bot de Discord muy básico escrito en Python con `discord.py`. Fue mi primer bot: responde a mensajes de texto con respuestas fijas y genera contraseñas aleatorias.
+Bot de música para Discord de **ItsTuki**. Es una versión modernizada de [JMusicBot](https://github.com/jagrosh/MusicBot) (abandonado desde 2024), unida con las funciones de mi primer bot en Python.
 
-## Qué responde
+JMusicBot ya no podía entrar a canales de voz: desde el 1 de marzo de 2026 Discord exige el cifrado de extremo a extremo **DAVE** en todas las llamadas, y el bot seguía en JDA 4. TukiBot lo migra a **JDA 6** con DAVE y lo adapta a las funciones actuales de Discord.
 
-| Mensaje que empieza con | Respuesta |
+## Qué trae
+
+**Funciones nuevas de Discord**
+- Comandos con barra (`/play`, `/queue`...) con **nombres en español** si tu Discord está en español (`/reproducir`, `/cola`...).
+- **Autocompletado**: `/play` sugiere canciones de YouTube mientras escribes; `/remove`, `/skipto` y `/movetrack` muestran los títulos de la cola.
+- **Panel de reproducción** con botones (pausar, saltar, detener, repetir, mezclar, volumen, cola, letra) que se actualiza solo y aparece cada vez que empieza una canción.
+- **Menú de selección** en `/search` con hasta 10 resultados (YouTube, YouTube Music o SoundCloud).
+- **Estado del canal de voz** con la canción que está sonando.
+- **Menú contextual**: clic derecho en un mensaje con un enlace › Apps › **Reproducir en voz**.
+- Opción para **adjuntar archivos de audio** en `/play`.
+- Paneles con Components V2, botones de enlace, respuestas privadas para errores y contraseñas.
+
+**De JMusicBot** (se mantiene todo): cola justa o lineal, rol de DJ, votación para saltar, repetir cola o canción, playlists guardadas, playlist automática, canal de texto/voz exclusivo, buscar, adelantar, mover canciones, salir solo si nadie escucha.
+
+**De mi bot original**: `/gen` (contraseña aleatoria), `/moneda`, `/twitch`, y las respuestas de texto `ItsTuki`, `$bye`, `!gen` y `!moneda`.
+
+## Comandos
+
+| Comando | Para qué sirve |
 |---|---|
-| `ItsTuki` | Comparte el enlace a mi canal de Twitch. |
-| `$bye` | Responde con un emoji 🙂. |
-| `!gen` | Genera una contraseña aleatoria de 10 caracteres (letras, números y símbolos). |
-| `!moneda` | Lanza una moneda (cara o cruz). |
-| Cualquier otro texto | Lo repite tal cual (modo eco). |
-
-## Requisitos
-
-- Python 3.8 o superior
-- `discord.py`
-
-```bash
-pip install discord.py
-```
+| `/play` | Reproduce una canción, playlist o transmisión (enlace, búsqueda o archivo) |
+| `/search` | Busca y elige de una lista |
+| `/nowplaying` | Panel de la canción actual con botones |
+| `/queue` | Cola de reproducción con páginas |
+| `/skip` | Vota para saltar (si la pediste tú, se salta al instante) |
+| `/remove` | Quita una canción tuya de la cola (0 = todas las tuyas) |
+| `/seek` | Adelanta o retrocede (`1:30`, `+30`, `-10`, `2m15s`) |
+| `/shuffle` | Mezcla tus canciones |
+| `/lyrics` | Letra de la canción (desde LRCLIB) |
+| `/playlist` | Reproduce, lista y (dueño) crea/edita playlists |
+| `/playnext` · `/pause` · `/resume` · `/forceskip` · `/skipto` · `/movetrack` · `/forceremove` · `/repeat` · `/volume` · `/stop` | Comandos de **DJ** |
+| `/config` | (Admin) rol de DJ, canales, % para saltar, tipo de cola, playlist automática |
+| `/settings` | Muestra la configuración del servidor |
+| `/owner` | (Dueño) actividad, estado, nombre, avatar, debug, apagar |
+| `/help` · `/about` · `/ping` · `/gen` · `/moneda` · `/twitch` | Generales |
 
 ## Cómo usarlo
 
-1. Crea un bot en el [Portal de desarrolladores de Discord](https://discord.com/developers/applications) y activa el intent **Message Content**.
-2. Reemplaza `"Token Aqui we"` en `main.py` por el token de tu bot (no lo subas a GitHub).
-3. Ejecuta:
+### 1. Requisitos
+- **Java 25** de 64 bits (lo exige DAVE): [Temurin 25](https://adoptium.net/temurin/releases/?version=25).
+- Windows x64, Linux x64/ARM64 o macOS.
+- Un equipo que permita conexiones **UDP salientes** (la voz de Discord usa UDP). Tu PC de casa o un VPS normal sirven.
 
+### 2. Preparar el bot en Discord
+1. En el [Developer Portal](https://discord.com/developers/applications) abre tu aplicación › **Bot** › **Reset Token** y copia el token.
+2. Si quieres las respuestas de texto (`ItsTuki`, `!gen`...), activa **MESSAGE CONTENT INTENT** en esa misma página. Si no, pon `textresponses = false` en el config.
+3. Invita al bot con el enlace que aparece en la consola al iniciarlo (ya trae los permisos necesarios).
+
+### 3. Descargar o compilar
+- **Descargar**: en la pestaña *Actions* del repo, abre la última compilación y baja el artefacto **TukiBot** (trae `TukiBot.jar` y los scripts).
+- **Compilar tú mismo** (necesitas Maven):
+  ```bash
+  mvn package
+  # el bot queda en target/TukiBot.jar
+  ```
+
+### 4. Iniciar
+Pon `TukiBot.jar` en una carpeta y ejecuta `iniciar.bat` (Windows) o `./iniciar.sh` (Linux/macOS), o directamente:
 ```bash
-python main.py
+java -jar TukiBot.jar
 ```
+La primera vez te pide el token y crea `config.txt`. Ahí puedes cambiar todo lo demás (comentado en español). Para generar el archivo sin iniciar: `java -jar TukiBot.jar generate-config`.
+
+> `config.txt` guarda tu token: **nunca lo subas a GitHub**. El `.gitignore` ya lo excluye.
+
+Consejo para probar: pon el ID de tu servidor en `devguild` y los comandos aparecen ahí al instante.
+
+## YouTube
+
+YouTube bloquea cada vez más a los bots. Si al reproducir aparece *"This video requires login"* (pasa sobre todo en servidores en la nube):
+
+1. En `config.txt` pon `youtube { oauth = true }` y reinicia.
+2. La consola mostrará un código: entra a **google.com/device** e ingrésalo con una **cuenta de Google secundaria** (nunca la principal).
+3. Listo: el bot guarda solo el *refresh token* en `config.txt` para las próximas veces.
+
+Las búsquedas y sugerencias de YouTube funcionan sin iniciar sesión.
 
 ## Estructura
 
 ```
-main.py       # eventos del bot y respuestas
-bot_logic.py  # generador de contraseñas y cara o cruz
+src/main/java/com/itstuki/tukibot/
+  TukiBot.java          inicio y conexión a Discord (DAVE, intents, comandos)
+  Bot.java, BotConfig.java, Listener.java
+  audio/                reproductor, cola, panel automático, fuentes de audio
+  commands/             sistema de comandos slash y comandos por categoría
+  interactions/         botones, menú contextual y respuestas de texto
+  music/                carga de canciones, acciones compartidas, autocompletado
+  ui/Panels.java        paneles Components V2
+  fun/BotLogic.java     gen_pass y flip_coin del bot original
+  lyrics/               cliente de LRCLIB
+  queue/, playlist/, settings/, utils/, gui/   (heredados de JMusicBot)
 ```
+
+## Créditos y licencia
+
+Basado en [JMusicBot](https://github.com/jagrosh/MusicBot) de John Grosh (jagrosh) y sus contribuidores, bajo la [Licencia Apache 2.0](LICENSE). Los cambios están descritos en [NOTICE](NOTICE).
+
+Usa [JDA](https://github.com/discord-jda/JDA), [JDAVE](https://github.com/MinnDevelopment/jdave), [Lavaplayer](https://github.com/lavalink-devs/lavaplayer), [youtube-source](https://github.com/lavalink-devs/youtube-source) y [LRCLIB](https://lrclib.net).
+
+La primera versión de este repo (el bot en Python) sigue disponible en el historial de commits.

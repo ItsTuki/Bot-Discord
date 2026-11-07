@@ -1,0 +1,19 @@
+# Compilación
+target/
+*.class
+
+# Datos locales del bot (¡el token vive en config.txt!)
+config.txt
+serversettings.json
+Playlists/
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+nbproject/
+__pycache__/

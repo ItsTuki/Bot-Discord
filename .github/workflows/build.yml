@@ -1,0 +1,29 @@
+name: Compilar
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+      - name: Compilar y probar
+        run: mvn -B package
+      - name: Copiar el jar
+        run: cp target/TukiBot.jar TukiBot.jar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TukiBot
+          path: |
+            TukiBot.jar
+            iniciar.bat
+            iniciar.sh

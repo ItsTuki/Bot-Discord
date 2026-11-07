@@ -1,0 +1,17 @@
+TukiBot
+Copyright 2026 ItsTuki
+
+Este proyecto es una obra derivada de JMusicBot
+(https://github.com/jagrosh/MusicBot), Copyright 2016-2024 John Grosh (jagrosh)
+y sus contribuidores, publicado bajo la Licencia Apache 2.0.
+
+Cambios principales respecto de JMusicBot:
+- Migración de JDA 4 a JDA 6 y soporte del cifrado de voz DAVE (JDAVE).
+- Comandos con barra (slash) localizados en español e inglés, autocompletado,
+  botones, menús de selección, paneles Components V2 y menú contextual.
+- Reemplazo de JDA-Utilities por un sistema de comandos propio.
+- Letras desde LRCLIB en lugar de JLyrics.
+- Integración de los comandos del bot original de ItsTuki (Bot-Discord en Python).
+- Textos traducidos al español.
+
+Ambos proyectos se distribuyen bajo la Licencia Apache 2.0 (ver LICENSE).
