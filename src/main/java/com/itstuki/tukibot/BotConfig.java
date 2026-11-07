@@ -244,7 +244,21 @@ public class BotConfig
     public long getAloneTimeUntilStop() { return aloneTimeUntilStop; }
     public boolean useYoutubeOauth() { return ytOauth; }
     public String getYoutubeRefreshToken() { return ytRefreshToken.isEmpty() ? null : ytRefreshToken; }
-    public String getYoutubeRemoteCipher() { return ytRemoteCipher.isEmpty() ? null : ytRemoteCipher; }
+    /** Servidor yt-cipher público recomendado por los autores de youtube-source. */
+    public static final String DEFAULT_REMOTE_CIPHER = "https://cipher.kikkia.dev/";
+
+    /**
+     * Vacío o "default" = servidor público; "none" = descifrar localmente
+     * (suele romperse cada vez que YouTube cambia su reproductor).
+     */
+    public String getYoutubeRemoteCipher()
+    {
+        if(ytRemoteCipher.isEmpty() || ytRemoteCipher.equalsIgnoreCase("default"))
+            return DEFAULT_REMOTE_CIPHER;
+        if(ytRemoteCipher.equalsIgnoreCase("none") || ytRemoteCipher.equalsIgnoreCase("off"))
+            return null;
+        return ytRemoteCipher;
+    }
     public String getYoutubeRemoteCipherPassword() { return ytRemoteCipherPassword.isEmpty() ? null : ytRemoteCipherPassword; }
     public Config getTransforms() { return transforms; }
 

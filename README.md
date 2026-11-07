@@ -75,9 +75,10 @@ Consejo para probar: pon el ID de tu servidor en `devguild` y los comandos apare
 
 YouTube bloquea cada vez más a los bots. Si al reproducir aparece *"This video requires login"* (pasa sobre todo en servidores en la nube):
 
-1. En `config.txt` pon `youtube { oauth = true }` y reinicia.
-2. La consola mostrará un código: entra a **google.com/device** e ingrésalo con una **cuenta de Google secundaria** (nunca la principal).
-3. Listo: el bot guarda solo el *refresh token* en `config.txt` para las próximas veces.
+1. Primero asegúrate de tener la última versión: el bot descifra las firmas de YouTube con el servidor público yt-cipher (opción `youtube.remotecipher`, vacío = servidor público).
+2. Si aún falla, en `config.txt` pon `youtube { oauth = true }` y reinicia.
+3. La consola mostrará un código: entra a **google.com/device** e ingrésalo con una **cuenta de Google secundaria** (nunca la principal).
+4. Listo: el bot guarda solo el *refresh token* en `config.txt` para las próximas veces.
 
 Las búsquedas y sugerencias de YouTube funcionan sin iniciar sesión.
 

@@ -103,25 +103,31 @@ public class PlayerManager extends DefaultAudioPlayerManager
 
     private static YoutubeAudioSourceManager createYoutubeSource(BotConfig config)
     {
+        // Orden pensado según cómo responde YouTube en 2026: MWEB y WEB necesitan
+        // descifrar firmas (lo hace el servidor remoto), ANDROID_VR a veces pide
+        // iniciar sesión. Los clientes de TV (OAuth) deben ir DESPUÉS de uno web,
+        // porque reutilizan el cifrado que este obtiene.
         List<Client> clients = new ArrayList<>();
+        clients.add(new MusicWithThumbnail());
+        clients.add(new MWebWithThumbnail());
+        clients.add(new WebWithThumbnail());
         if(config.useYoutubeOauth())
         {
-            // Los clientes de TV son los que aceptan OAuth.
             clients.add(new TvHtml5SimplyWithThumbnail());
             clients.add(new Tv());
         }
-        clients.add(new MusicWithThumbnail());
         clients.add(new AndroidVrWithThumbnail());
-        clients.add(new WebWithThumbnail());
         clients.add(new WebEmbeddedWithThumbnail());
-        clients.add(new MWebWithThumbnail());
 
         YoutubeSourceOptions options = new YoutubeSourceOptions()
                 .setAllowSearch(true)
                 .setAllowDirectVideoIds(true)
                 .setAllowDirectPlaylistIds(true);
         if(config.getYoutubeRemoteCipher() != null)
+        {
             options.setRemoteCipher(config.getYoutubeRemoteCipher(), config.getYoutubeRemoteCipherPassword(), "TukiBot");
+            LOG.info("YouTube: descifrando firmas con " + config.getYoutubeRemoteCipher());
+        }
 
         YoutubeAudioSourceManager yt = new YoutubeAudioSourceManager(options, clients.toArray(new Client[0]));
         yt.setPlaylistPageCount(config.getMaxYTPlaylistPages());
