@@ -35,6 +35,7 @@ import com.sedmelluq.discord.lavaplayer.source.vimeo.VimeoAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import com.itstuki.tukibot.spotify.SpotifySourceManager;
 import com.itstuki.tukibot.ytdlp.YtDlp;
 import com.itstuki.tukibot.ytdlp.YtDlpSourceManager;
 import dev.lavalink.youtube.YoutubeAudioSourceManager;
@@ -71,6 +72,8 @@ public class PlayerManager extends DefaultAudioPlayerManager
     {
         BotConfig config = bot.getConfig();
         TransformativeAudioSourceManager.createTransforms(config.getTransforms()).forEach(this::registerSourceManager);
+
+        registerSourceManager(new SpotifySourceManager(this));
 
         youtube = createYoutubeSource(config);
         registerSourceManager(youtube);

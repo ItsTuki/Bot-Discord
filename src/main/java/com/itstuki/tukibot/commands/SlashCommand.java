@@ -56,8 +56,9 @@ public abstract class SlashCommand
     public SlashCommandData build()
     {
         SlashCommandData data = Commands.slash(name, help);
-        if(nameEs != null && !nameEs.equals(name))
-            data.setNameLocalizations(Loc.es(nameEs));
+        // Los nombres de comandos van en inglés para todos (/play, /skip...),
+        // así funcionan igual sin importar el idioma de Discord. Las
+        // descripciones y las opciones sí están en español.
         if(helpEn != null)
             data.setDescriptionLocalizations(Loc.en(helpEn));
         data.setContexts(guildOnly ? EnumSet.of(InteractionContextType.GUILD)

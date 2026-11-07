@@ -7,13 +7,14 @@ JMusicBot ya no podía entrar a canales de voz: desde el 1 de marzo de 2026 Disc
 ## Qué trae
 
 **Funciones nuevas de Discord**
-- Comandos con barra (`/play`, `/queue`...) con **nombres en español** si tu Discord está en español (`/reproducir`, `/cola`...).
+- Comandos con barra (`/play`, `/queue`, `/skip`...) con descripciones y opciones en español. Con `/play` escribes directo el nombre o pegas el enlace: el bot reconoce solo cuál es.
+- **Enlaces de Spotify**: canciones, álbumes y playlists. Cada canción se busca en YouTube (eligiendo la versión con la duración más parecida) cuando le toca sonar, así las playlists se agregan al instante.
 - **Autocompletado**: `/play` sugiere canciones de YouTube mientras escribes; `/remove`, `/skipto` y `/movetrack` muestran los títulos de la cola.
 - **Panel de reproducción** con botones (pausar, saltar, detener, repetir, mezclar, volumen, cola, letra) que se actualiza solo y aparece cada vez que empieza una canción.
 - **Menú de selección** en `/search` con hasta 10 resultados (YouTube, YouTube Music o SoundCloud).
 - **Estado del canal de voz** con la canción que está sonando.
 - **Menú contextual**: clic derecho en un mensaje con un enlace › Apps › **Reproducir en voz**.
-- Opción para **adjuntar archivos de audio** en `/play`.
+- **`/playfile`** para reproducir archivos de audio adjuntos.
 - Paneles con Components V2, botones de enlace, respuestas privadas para errores y contraseñas.
 
 **De JMusicBot** (se mantiene todo): cola justa o lineal, rol de DJ, votación para saltar, repetir cola o canción, playlists guardadas, playlist automática, canal de texto/voz exclusivo, buscar, adelantar, mover canciones, salir solo si nadie escucha.
@@ -24,7 +25,8 @@ JMusicBot ya no podía entrar a canales de voz: desde el 1 de marzo de 2026 Disc
 
 | Comando | Para qué sirve |
 |---|---|
-| `/play` | Reproduce una canción, playlist o transmisión (enlace, búsqueda o archivo) |
+| `/play` | Reproduce una canción o playlist: nombre o enlace (YouTube, Spotify, SoundCloud, Twitch...) |
+| `/playfile` | Reproduce un archivo de audio adjunto |
 | `/search` | Busca y elige de una lista |
 | `/nowplaying` | Panel de la canción actual con botones |
 | `/queue` | Cola de reproducción con páginas |
@@ -93,6 +95,7 @@ src/main/java/com/itstuki/tukibot/
   music/                carga de canciones, acciones compartidas, autocompletado
   ui/Panels.java        paneles Components V2
   ytdlp/                reproducción de YouTube con yt-dlp
+  spotify/              enlaces de Spotify (se reproducen desde YouTube)
   fun/BotLogic.java     gen_pass y flip_coin del bot original
   lyrics/               cliente de LRCLIB
   queue/, playlist/, settings/, utils/, gui/   (heredados de JMusicBot)

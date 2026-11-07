@@ -206,6 +206,7 @@ public class TukiBot
                         new TwitchCmd(bot),
                         // música
                         new PlayCmd(bot),
+                        new PlayFileCmd(bot),
                         search,
                         new NowplayingCmd(bot),
                         new QueueCmd(bot),
