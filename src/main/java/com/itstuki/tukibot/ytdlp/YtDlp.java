@@ -148,6 +148,10 @@ public class YtDlp
             deno = localDeno.toString();
         }
         LOG.info("yt-dlp listo (" + version() + "). YouTube se reproducirá con yt-dlp.");
+        if(config.getYoutubeCookies() != null)
+            LOG.info("yt-dlp usará las cookies de " + config.getYoutubeCookies());
+        else if(config.getYoutubeCookiesBrowser() != null)
+            LOG.info("yt-dlp usará las cookies del navegador " + config.getYoutubeCookiesBrowser());
     }
 
     private String ytdlpAsset()

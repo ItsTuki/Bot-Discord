@@ -250,7 +250,14 @@ public class BotConfig
     public String getYoutubeRefreshToken() { return ytRefreshToken.isEmpty() ? null : ytRefreshToken; }
     public boolean useYtDlp() { return ytdlp; }
     public String getYtDlpPath() { return ytdlpPath.isEmpty() ? null : ytdlpPath; }
-    public String getYoutubeCookies() { return ytCookies.isEmpty() ? null : ytCookies; }
+    /** Archivo de cookies: el del config o, si no hay, un cookies.txt junto al bot. */
+    public String getYoutubeCookies()
+    {
+        if(!ytCookies.isEmpty())
+            return ytCookies;
+        java.nio.file.Path auto = OtherUtil.getPath("cookies.txt");
+        return Files.isRegularFile(auto) ? auto.toAbsolutePath().toString() : null;
+    }
     public String getYoutubeCookiesBrowser() { return ytCookiesBrowser.isEmpty() ? null : ytCookiesBrowser; }
 
     /** Servidor yt-cipher público recomendado por los autores de youtube-source. */

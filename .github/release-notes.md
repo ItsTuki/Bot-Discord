@@ -1,12 +1,11 @@
-## Spotify y `/play` más simple
+## cookies.txt automático
 
-- **Enlaces de Spotify:** `/play` acepta canciones, álbumes y playlists de Spotify (también los enlaces con `?si=...` o `/intl-es/`). No necesita claves de API: el bot lee los datos públicos de Spotify y busca cada canción en YouTube cuando le toca sonar, eligiendo la versión con la duración más parecida. Las playlists se agregan al instante y el panel muestra la portada de Spotify.
-- **`/play` directo:** ahora escribes `/play` y de inmediato el nombre o el enlace; ya no hay que elegir la opción "busqueda". El bot reconoce solo si es un enlace (YouTube, Spotify, SoundCloud...) o una búsqueda.
-- **Comandos en inglés para todos:** `/play`, `/skip`, `/queue`, etc. funcionan igual sin importar el idioma de tu Discord (las descripciones siguen en español).
-- **`/playfile`:** nuevo comando para reproducir un archivo de audio adjunto (antes era una opción de `/play`).
+Cuando YouTube marca tu IP ("Sign in to confirm you're not a bot"), la solución es darle a yt-dlp una sesión de YouTube. Ahora basta con dejar un archivo **`cookies.txt`** junto a `TukiBot.jar`: el bot lo detecta solo, sin tocar `config.txt`. Al iniciar, la consola muestra qué cookies está usando.
 
-### Actualizar
-Reemplaza `TukiBot.jar` y reinicia. Discord puede tardar unos minutos en mostrar los comandos con los nombres nuevos; si no aparecen, reinicia Discord (Ctrl+R).
+Cómo obtener el `cookies.txt` (con Chrome en Windows; yt-dlp no puede leer sus cookies directamente):
+1. Abre una ventana de incógnito e inicia sesión en YouTube con una **cuenta de Google secundaria**.
+2. Con la extensión **Get cookies.txt LOCALLY** (permítela en incógnito), entra a `youtube.com/robots.txt` y exporta las cookies.
+3. Cierra la ventana de incógnito y guarda el archivo como `cookies.txt` junto al bot.
 
 ---
 Requiere **Java 25** de 64 bits: https://adoptium.net/temurin/releases/?version=25 · Más detalles en el [README](https://github.com/ItsTuki/Bot-Discord#readme).
