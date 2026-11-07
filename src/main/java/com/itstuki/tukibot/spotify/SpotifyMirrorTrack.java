@@ -43,14 +43,21 @@ public class SpotifyMirrorTrack extends DelegatedAudioTrack
     @Override
     public void process(LocalAudioTrackExecutor executor) throws Exception
     {
+        AudioTrack match = sourceManager.findMatch(this);
+        AudioTrack playable = sourceManager.getPlayerManager().prepare(match.makeClone());
+        processDelegate((InternalAudioTrack) playable, executor);
+    }
+
+    /** Busca la canción en YouTube (sin caché; ver SpotifySourceManager#findMatch). */
+    AudioTrack searchMatch() throws Exception
+    {
         String query = (trackInfo.author == null || trackInfo.author.isBlank() ? "" : trackInfo.author.split(",")[0].trim() + " - ") + trackInfo.title;
         AudioTrack match = find("ytmsearch:", query);
         if(match == null)
             match = find("ytsearch:", query);
         if(match == null)
             throw new FriendlyException("No encontré \"" + query + "\" en YouTube.", FriendlyException.Severity.COMMON, null);
-        AudioTrack playable = sourceManager.getPlayerManager().prepare(match);
-        processDelegate((InternalAudioTrack) playable, executor);
+        return match;
     }
 
     private AudioTrack find(String prefix, String query) throws Exception

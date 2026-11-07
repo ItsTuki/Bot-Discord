@@ -42,8 +42,16 @@ public class TwitchCmd extends SlashCommand
     @Override
     protected void execute(CommandContext ctx)
     {
+        var notifier = bot.getTwitch();
+        var stream = notifier.isEnabled() ? notifier.getCurrent() : null;
+        if(stream != null)
+        {
+            ctx.reply(notifier.message(ctx.guild(), stream, null), false, null);
+            return;
+        }
+        String status = notifier.isEnabled() && notifier.isWorking() ? "\n-# Ahora mismo está desconectado." : "";
         ctx.reply(new MessageCreateBuilder()
-                .setContent("🟣 Puedes seguirme en Twitch: " + url(bot))
+                .setContent("🟣 Puedes seguirme en Twitch: " + url(bot) + status)
                 .setComponents(ActionRow.of(Button.link(url(bot), "Ir a Twitch")))
                 .build(), false, null);
     }

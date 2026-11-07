@@ -51,7 +51,7 @@ public class SettingsManager
                     o.put("repeat_mode", RepeatMode.ALL);
 
 
-                settings.put(Long.parseLong(id), new Settings(this,
+                Settings loaded = new Settings(this,
                         o.has("text_channel_id") ? o.getString("text_channel_id")            : null,
                         o.has("voice_channel_id")? o.getString("voice_channel_id")           : null,
                         o.has("dj_role_id")      ? o.getString("dj_role_id")                 : null,
@@ -59,7 +59,9 @@ public class SettingsManager
                         o.has("default_playlist")? o.getString("default_playlist")           : null,
                         o.has("repeat_mode")     ? o.getEnum(RepeatMode.class, "repeat_mode"): RepeatMode.OFF,
                         o.has("skip_ratio")      ? o.getDouble("skip_ratio")                 : -1,
-                        o.has("queue_type")      ? o.getEnum(QueueType.class, "queue_type")  : QueueType.FAIR));
+                        o.has("queue_type")      ? o.getEnum(QueueType.class, "queue_type")  : QueueType.FAIR);
+                loaded.loadExtras(o.optBoolean("autoplay", false), o.optLong("twitch_channel_id", 0L), o.optLong("twitch_role_id", 0L));
+                settings.put(Long.parseLong(id), loaded);
             });
         } catch (NoSuchFileException e) {
             // create an empty json file
@@ -120,6 +122,12 @@ public class SettingsManager
                 o.put("skip_ratio", s.getSkipRatio());
             if(s.getQueueType() != QueueType.FAIR)
                 o.put("queue_type", s.getQueueType().name());
+            if(s.isAutoplay())
+                o.put("autoplay", true);
+            if(s.getTwitchChannelId() != 0)
+                o.put("twitch_channel_id", Long.toString(s.getTwitchChannelId()));
+            if(s.getTwitchRoleId() != 0)
+                o.put("twitch_role_id", Long.toString(s.getTwitchRoleId()));
             obj.put(Long.toString(key), o);
         });
         try {

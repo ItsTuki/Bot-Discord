@@ -1,0 +1,102 @@
+{
+    "_comment": "Egg de Pterodactyl para TukiBot - https://github.com/ItsTuki/Bot-Discord",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-11-07T00:00:00+00:00",
+    "name": "TukiBot",
+    "author": "117235985+ItsTuki@users.noreply.github.com",
+    "description": "Bot de música para Discord (YouTube, Spotify, SoundCloud y más) con comandos slash, paneles con botones y cifrado de voz DAVE. Necesita Java 25.",
+    "features": null,
+    "docker_images": {
+        "Java 25": "ghcr.io/pterodactyl/yolks:java_25"
+    },
+    "file_denylist": [],
+    "startup": "if [ -f {{SERVER_JARFILE}}.new ]; then mv -f {{SERVER_JARFILE}}.new {{SERVER_JARFILE}}; fi; java -Xms128M -XX:MaxRAMPercentage=85.0 -Dnogui=true -jar {{SERVER_JARFILE}}",
+    "config": {
+        "files": "{}",
+        "startup": "{\"done\": \"Comandos registrados\"}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/ash\n# Instalador de TukiBot para Pterodactyl\napk add --no-cache curl ca-certificates >/dev/null\nmkdir -p /mnt/server\ncd /mnt/server\n\nif [ -z \"${TUKIBOT_VERSION}\" ] || [ \"${TUKIBOT_VERSION}\" = \"latest\" ]; then\n  URL=\"https://github.com/ItsTuki/Bot-Discord/releases/latest/download/TukiBot.jar\"\nelse\n  V=\"${TUKIBOT_VERSION#v}\"\n  URL=\"https://github.com/ItsTuki/Bot-Discord/releases/download/v${V}/TukiBot.jar\"\nfi\n\necho \"Descargando ${URL}\"\ncurl -fL --retry 3 -o \"${SERVER_JARFILE}\" \"${URL}\" || { echo \"No se pudo descargar TukiBot\"; exit 1; }\nrm -f \"${SERVER_JARFILE}.new\"\necho \"TukiBot instalado. Pon el token en la pestaña Startup y enciende el servidor.\"\n",
+            "container": "ghcr.io/pterodactyl/installers:alpine",
+            "entrypoint": "ash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Token del bot",
+            "description": "Token de tu bot (Developer Portal > Bot > Reset Token). Se guarda como variable de entorno, no en config.txt.",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:50",
+            "field_type": "text"
+        },
+        {
+            "name": "ID del dueño",
+            "description": "Tu ID de usuario de Discord (clic derecho en tu perfil > Copiar ID). Con 0 se usa el dueño de la aplicación.",
+            "env_variable": "OWNER_ID",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+        },
+        {
+            "name": "Archivo jar",
+            "description": "Nombre del jar del bot.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "TukiBot.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+        },
+        {
+            "name": "Versión",
+            "description": "Versión a instalar (por ejemplo 1.3.0) o latest. Solo se usa al reinstalar.",
+            "env_variable": "TUKIBOT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+        },
+        {
+            "name": "Actualización automática",
+            "description": "true = descarga sola las versiones nuevas y las aplica al reiniciar.",
+            "env_variable": "TUKIBOT_AUTOUPDATE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Twitch Client ID",
+            "description": "Opcional: para avisar cuando empieza tu directo (https://dev.twitch.tv/console/apps).",
+            "env_variable": "TWITCH_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Twitch Client Secret",
+            "description": "Opcional: el secreto de esa aplicación de Twitch.",
+            "env_variable": "TWITCH_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+        }
+    ]
+}

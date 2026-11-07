@@ -5,6 +5,10 @@ target/
 # Datos locales del bot (¡el token vive en config.txt!)
 config.txt
 serversettings.json
+userplaylists.json
+userplaylists.json.tmp
+*.jar.new
+*.jar.download
 Playlists/
 *.log
 

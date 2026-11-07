@@ -60,6 +60,36 @@ public class SpotifySourceManager implements AudioSourceManager
         this.playerManager = playerManager;
     }
 
+    /** Canción de Spotify → video de YouTube elegido (para no buscar dos veces). */
+    private final java.util.Map<String, AudioTrack> matches = java.util.Collections.synchronizedMap(
+            new java.util.LinkedHashMap<>(64, 0.75f, true)
+            {
+                @Override
+                protected boolean removeEldestEntry(java.util.Map.Entry<String, AudioTrack> eldest)
+                {
+                    return size() > 500;
+                }
+            });
+
+    /** Busca (o recuerda) el video de YouTube que corresponde a una canción de Spotify. */
+    public AudioTrack findMatch(SpotifyMirrorTrack track) throws Exception
+    {
+        String key = track.getIdentifier();
+        AudioTrack cached = matches.get(key);
+        if(cached != null)
+            return cached;
+        AudioTrack match = track.searchMatch();
+        matches.put(key, match);
+        return match;
+    }
+
+    /** ID del video de YouTube elegido, si ya se buscó. */
+    public String getMatchedYoutubeId(String spotifyId)
+    {
+        AudioTrack m = matches.get(spotifyId);
+        return m == null ? null : m.getIdentifier();
+    }
+
     public PlayerManager getPlayerManager()
     {
         return playerManager;

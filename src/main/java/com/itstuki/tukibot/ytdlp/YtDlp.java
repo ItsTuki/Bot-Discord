@@ -66,6 +66,11 @@ public class YtDlp
 
     public record Stream(String url, String ext, String userAgent) {}
 
+    /** Descargas adelantadas de la próxima canción de cada cola. */
+    private record Prefetch(java.util.concurrent.CompletableFuture<YtDlpDownload> future, long created) {}
+    private static final long PREFETCH_TTL = 15 * 60 * 1000;
+    private final java.util.Map<String, Prefetch> prefetched = new java.util.concurrent.ConcurrentHashMap<>();
+
     public YtDlp(BotConfig config)
     {
         this.config = config;
@@ -92,6 +97,7 @@ public class YtDlp
                 setup();
                 if(managed)
                     scheduler.scheduleWithFixedDelay(this::selfUpdate, 0, 24, TimeUnit.HOURS);
+                scheduler.scheduleWithFixedDelay(this::expirePrefetched, 5, 5, TimeUnit.MINUTES);
             }
             catch(Exception e)
             {
@@ -344,6 +350,73 @@ public class YtDlp
             throw new IOException(msg);
         }
         return new YtDlpDownload(p, file, ext, err);
+    }
+
+    /**
+     * Empieza a descargar un video en segundo plano para que, cuando le toque
+     * sonar, empiece al instante. Solo se guardan unas pocas a la vez.
+     */
+    public void prefetch(String videoUrl)
+    {
+        if(!isReady() || videoUrl == null || prefetched.containsKey(videoUrl))
+            return;
+        if(prefetched.size() >= 4)
+            prefetched.entrySet().stream().min(java.util.Comparator.comparingLong(e -> e.getValue().created()))
+                    .ifPresent(e -> discard(e.getKey()));
+        java.util.concurrent.CompletableFuture<YtDlpDownload> future = new java.util.concurrent.CompletableFuture<>();
+        prefetched.put(videoUrl, new Prefetch(future, System.currentTimeMillis()));
+        Thread.ofVirtual().start(() -> {
+            try
+            {
+                future.complete(download(videoUrl));
+                LOG.debug("Precargando " + videoUrl);
+            }
+            catch(Exception e)
+            {
+                prefetched.remove(videoUrl);
+                future.complete(null);
+                LOG.debug("No se pudo precargar " + videoUrl + ": " + e.getMessage());
+            }
+        });
+    }
+
+    /** Devuelve la descarga adelantada de ese video (o null si no hay). */
+    public YtDlpDownload takePrefetched(String videoUrl)
+    {
+        Prefetch p = prefetched.remove(videoUrl);
+        if(p == null)
+            return null;
+        try
+        {
+            return p.future().get(60, TimeUnit.SECONDS);
+        }
+        catch(Exception e)
+        {
+            return null;
+        }
+    }
+
+    private void discard(String videoUrl)
+    {
+        Prefetch p = prefetched.remove(videoUrl);
+        if(p != null)
+            p.future().thenAccept(d -> {
+                if(d != null)
+                    try { d.close(); } catch(IOException ignored) {}
+            });
+    }
+
+    private void expirePrefetched()
+    {
+        long now = System.currentTimeMillis();
+        prefetched.entrySet().stream().filter(e -> now - e.getValue().created() > PREFETCH_TTL)
+                .map(java.util.Map.Entry::getKey).toList().forEach(this::discard);
+    }
+
+    /** Cierra las descargas adelantadas (al apagar el bot). */
+    public void shutdown()
+    {
+        java.util.List.copyOf(prefetched.keySet()).forEach(this::discard);
     }
 
     private record Result(int exit, String out, String err) {}

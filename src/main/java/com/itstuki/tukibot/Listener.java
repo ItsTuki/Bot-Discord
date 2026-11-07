@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 public class Listener extends ListenerAdapter
 {
     private static final Logger LOG = LoggerFactory.getLogger("TukiBot");
+    private volatile boolean ready = false;
     private final Bot bot;
 
     public Listener(Bot bot)
@@ -40,6 +41,7 @@ public class Listener extends ListenerAdapter
     public void onReady(ReadyEvent event)
     {
         var jda = event.getJDA();
+        ready = true;
         LOG.info("Conectado como " + jda.getSelfUser().getName() + " en " + jda.getGuildCache().size() + " servidores.");
         if(jda.getGuildCache().isEmpty())
         {
@@ -91,6 +93,13 @@ public class Listener extends ListenerAdapter
     @Override
     public void onShutdown(ShutdownEvent event)
     {
+        if(!ready)
+            LOG.error("No se pudo iniciar sesión en Discord. Lo más probable es que el token sea inválido: "
+                    + "revisa config.txt o la variable BOT_TOKEN (Developer Portal > Bot > Reset Token).");
+        else if(event.getCloseCode() != null && !event.getCloseCode().isReconnect())
+            LOG.error("Discord cerró la conexión: " + event.getCloseCode().getMeaning()
+                    + (event.getCloseCode() == net.dv8tion.jda.api.requests.CloseCode.AUTHENTICATION_FAILED
+                        ? " Revisa el token (en config.txt o en la variable BOT_TOKEN)." : ""));
         bot.shutdown();
     }
 }

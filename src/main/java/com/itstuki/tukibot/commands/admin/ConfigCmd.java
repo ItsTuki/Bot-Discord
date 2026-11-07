@@ -22,7 +22,9 @@ import com.itstuki.tukibot.music.Autocomplete;
 import com.itstuki.tukibot.playlist.PlaylistLoader;
 import com.itstuki.tukibot.settings.QueueType;
 import com.itstuki.tukibot.settings.Settings;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
@@ -67,6 +69,10 @@ public class ConfigCmd extends SlashCommand
                         .addOptions(Loc.option(OptionType.STRING, "type", "tipo", "Tipo de cola", "Queue type", true)
                                 .addChoice("Justa (se alternan las canciones de cada persona)", "FAIR")
                                 .addChoice("Lineal (por orden de llegada)", "LINEAR")),
+                Loc.sub("twitch", "twitch", "Canal donde se avisa cuando empieza el directo de Twitch (vacío = desactivar)", "Sets the Twitch live alert channel")
+                        .addOptions(Loc.option(OptionType.CHANNEL, "channel", "canal", "Canal de texto o anuncios", "Text or announcement channel", false)
+                                        .setChannelTypes(ChannelType.TEXT, ChannelType.NEWS),
+                                Loc.option(OptionType.ROLE, "role", "rol", "Rol a mencionar en el aviso (opcional)", "Role to ping (optional)", false)),
                 Loc.sub("autoplaylist", "autoplaylist", "Playlist que suena cuando la cola está vacía (vacío = ninguna)", "Sets the default playlist")
                         .addOptions(Loc.option(OptionType.STRING, "name", "nombre", "Nombre de la playlist", "Playlist name", false).setAutoComplete(true)));
     }
@@ -115,6 +121,36 @@ public class ConfigCmd extends SlashCommand
                         handler.setQueueType(value);
                 }
                 ctx.reply(value.getEmoji() + " El tipo de cola ahora es **" + value.getUserFriendlyName() + "**.");
+            }
+            case "twitch" -> {
+                OptionMapping o = ctx.option("channel");
+                if(o == null)
+                {
+                    s.setTwitchNotify(0L, 0L);
+                    ctx.replySuccess("Desactivé los avisos de directos de Twitch en este servidor.");
+                    return;
+                }
+                GuildMessageChannel ch = o.getAsChannel().asGuildMessageChannel();
+                OptionMapping r = ctx.option("role");
+                Role role = r == null ? null : r.getAsRole();
+                if(!ctx.guild().getSelfMember().hasPermission(ch, Permission.VIEW_CHANNEL, Permission.MESSAGE_SEND))
+                {
+                    ctx.replyError("No tengo permiso para escribir en " + ch.getAsMention() + ".");
+                    return;
+                }
+                if(role != null && !role.isMentionable() && !ctx.guild().getSelfMember().hasPermission(ch, Permission.MESSAGE_MENTION_EVERYONE))
+                {
+                    ctx.replyError("No puedo mencionar a " + role.getAsMention() + ": activa *Permitir que cualquiera @mencione este rol* "
+                            + "o dame el permiso *Mencionar @everyone, @here y todos los roles*.");
+                    return;
+                }
+                s.setTwitchNotify(ch.getIdLong(), role == null ? 0L : role.getIdLong());
+                String user = bot.getConfig().getTwitch();
+                StringBuilder sb = new StringBuilder("Cuando **" + user + "** empiece un directo en Twitch lo avisaré en " + ch.getAsMention()
+                        + (role == null ? "." : " mencionando a " + role.getAsMention() + "."));
+                if(!bot.getTwitch().isEnabled())
+                    sb.append("\n").append(bot.getConfig().getWarning()).append(" Ojo: el dueño del bot todavía no configuró `twitchnotify` en el config.txt, así que los avisos no saldrán hasta que lo haga.");
+                ctx.replySuccess(sb.toString());
             }
             case "autoplaylist" -> {
                 String pname = ctx.string("name", null);

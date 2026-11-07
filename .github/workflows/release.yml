@@ -35,7 +35,7 @@ jobs:
         run: |
           mkdir dist
           cp target/TukiBot.jar dist/TukiBot.jar
-          cp iniciar.bat iniciar.sh dist/
+          cp iniciar.bat iniciar.sh pterodactyl/egg-tukibot.json dist/
           (cd dist && zip -q TukiBot-${{ steps.version.outputs.tag }}.zip TukiBot.jar iniciar.bat iniciar.sh)
       - name: Crear release
         uses: softprops/action-gh-release@v2
@@ -46,3 +46,4 @@ jobs:
           files: |
             dist/TukiBot.jar
             dist/TukiBot-${{ steps.version.outputs.tag }}.zip
+            dist/egg-tukibot.json

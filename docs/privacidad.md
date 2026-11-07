@@ -5,12 +5,14 @@
 Esta política explica qué datos usa **TukiBot** (ID de aplicación `1093304936885923910`), el bot de Discord operado por **ItsTuki**, para qué los usa y cómo puedes pedir que se borren. TukiBot recopila lo mínimo necesario para funcionar.
 
 ## 1. Datos que se guardan de forma permanente
-Solo la **configuración de cada servidor**, que los administradores definen con `/config` y otros comandos:
+**Configuración de cada servidor**, que los administradores definen con `/config` y otros comandos:
 - ID del servidor;
-- IDs del canal de texto y de voz elegidos para la música, y del rol de DJ;
-- volumen, modo de repetición, tipo de cola, porcentaje de votos para saltar y nombre de la playlist automática.
+- IDs del canal de texto y de voz elegidos para la música, del rol de DJ y, si se activan los avisos de Twitch, del canal y rol para esos avisos;
+- volumen, modo de repetición, autoplay, tipo de cola, porcentaje de votos para saltar y nombre de la playlist automática.
 
-No se guardan mensajes, nombres de usuario, historial de canciones ni datos personales de los miembros.
+**Playlists personales**, solo si tú las creas con `/myplaylist`: tu ID de usuario de Discord, el nombre que les pusiste y el título y enlace de cada canción. Puedes borrarlas cuando quieras con `/myplaylist delete`.
+
+No se guardan mensajes, nombres de usuario ni un historial de lo que escuchas.
 
 ## 2. Datos que se usan solo mientras el bot funciona
 Estos datos viven en memoria y se borran al terminar la cola, al expirar o al reiniciar el bot:
@@ -27,7 +29,9 @@ Si las respuestas de texto están activadas, TukiBot lee los mensajes de los can
 Para cumplir lo que pides, TukiBot envía datos a:
 - **Discord**, que opera la plataforma (ver su [política de privacidad](https://discord.com/privacy));
 - **plataformas de audio** (YouTube, SoundCloud, Bandcamp, Vimeo, Twitch y otras) cuando buscas o reproduces algo: se envía la búsqueda o el enlace, nunca tus datos de Discord;
-- **LRCLIB** (lrclib.net), cuando pides una letra: se envía el título y el artista de la canción.
+- **LRCLIB** (lrclib.net), cuando pides una letra: se envía el título y el artista de la canción;
+- **Twitch**, si el operador activa los avisos de directos: se consulta si un canal público está en vivo, sin enviar datos de usuarios;
+- **GitHub**, para buscar actualizaciones del propio bot, sin enviar datos de usuarios.
 
 TukiBot no vende ni comparte datos con nadie más, no muestra publicidad y no hace seguimiento.
 
@@ -36,6 +40,7 @@ La consola del bot registra eventos técnicos (inicio, errores, identificadores 
 
 ## 6. Conservación y borrado
 - La configuración de un servidor se conserva mientras el bot esté en él. Los administradores pueden cambiarla en cualquier momento con `/config`.
+- Tus playlists personales se conservan hasta que las borres con `/myplaylist delete`.
 - Para pedir que se borre la configuración de un servidor o cualquier dato relacionado contigo, abre un *issue* en [github.com/ItsTuki/Bot-Discord/issues](https://github.com/ItsTuki/Bot-Discord/issues) o escribe a **itstuki** en Discord. Las solicitudes se atienden en un plazo de 30 días.
 - Los datos temporales se borran solos según lo indicado en la sección 2.
 

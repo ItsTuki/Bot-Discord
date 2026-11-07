@@ -15,6 +15,12 @@ JMusicBot ya no podía entrar a canales de voz: desde el 1 de marzo de 2026 Disc
 - **Estado del canal de voz** con la canción que está sonando.
 - **Menú contextual**: clic derecho en un mensaje con un enlace › Apps › **Reproducir en voz**.
 - **`/playfile`** para reproducir archivos de audio adjuntos.
+- **Autoplay / modo radio** (`/autoplay` o el botón 📻): cuando se acaba la cola sigue con canciones parecidas a la última.
+- **Filtros de audio** (`/filter`): bass boost, nightcore, vaporwave, 8D, karaoke, suave, agudos y vibrato.
+- **Playlists personales** (`/myplaylist`): cada persona guarda las suyas y las usa en cualquier servidor.
+- **Avisos de directos de Twitch** en el canal que elija cada servidor (`/config twitch`).
+- **Precarga** de la siguiente canción para que el cambio sea casi instantáneo.
+- **Actualización automática** desde los releases de GitHub y **aviso por MD** al dueño si YouTube bloquea la música.
 - Paneles con Components V2, botones de enlace, respuestas privadas para errores y contraseñas.
 
 **De JMusicBot** (se mantiene todo): cola justa o lineal, rol de DJ, votación para saltar, repetir cola o canción, playlists guardadas, playlist automática, canal de texto/voz exclusivo, buscar, adelantar, mover canciones, salir solo si nadie escucha.
@@ -35,9 +41,11 @@ JMusicBot ya no podía entrar a canales de voz: desde el 1 de marzo de 2026 Disc
 | `/seek` | Adelanta o retrocede (`1:30`, `+30`, `-10`, `2m15s`) |
 | `/shuffle` | Mezcla tus canciones |
 | `/lyrics` | Letra de la canción (desde LRCLIB) |
-| `/playlist` | Reproduce, lista y (dueño) crea/edita playlists |
+| `/playlist` | Reproduce, lista y (dueño) crea/edita las playlists del bot |
+| `/myplaylist` | Tus playlists personales: `save`, `add`, `play`, `list`, `show`, `remove`, `delete` |
 | `/playnext` · `/pause` · `/resume` · `/forceskip` · `/skipto` · `/movetrack` · `/forceremove` · `/repeat` · `/volume` · `/stop` | Comandos de **DJ** |
-| `/config` | (Admin) rol de DJ, canales, % para saltar, tipo de cola, playlist automática |
+| `/autoplay` · `/filter` | (DJ) Modo radio y filtros de audio |
+| `/config` | (Admin) rol de DJ, canales, % para saltar, tipo de cola, playlist automática, avisos de Twitch |
 | `/settings` | Muestra la configuración del servidor |
 | `/owner` | (Dueño) actividad, estado, nombre, avatar, debug, apagar |
 | `/help` · `/about` · `/ping` · `/gen` · `/moneda` · `/twitch` | Generales |
@@ -73,6 +81,39 @@ La primera vez te pide el token y crea `config.txt`. Ahí puedes cambiar todo lo
 
 Consejo para probar: pon el ID de tu servidor en `devguild` y los comandos aparecen ahí al instante.
 
+### Pterodactyl
+1. En el panel de administración: **Nests › Import Egg** y sube [`pterodactyl/egg-tukibot.json`](pterodactyl/egg-tukibot.json) (también va adjunto en cada release).
+2. Crea un servidor con ese egg (imagen *Java 25*, 512 MB de RAM bastan). El instalador descarga el último `TukiBot.jar`.
+3. En la pestaña **Startup** pon el **token** y tu **ID de Discord**. El token queda como variable de entorno (`BOT_TOKEN`), no en `config.txt`.
+4. Enciéndelo. Si YouTube pide iniciar sesión (pasa mucho en VPS), sube un `cookies.txt` (ver [YouTube](#youtube)) y reinicia.
+
+Las actualizaciones se descargan solas y se instalan al reiniciar.
+
+### Variables de entorno
+Sirven en Docker, Pterodactyl o cualquier hosting y tienen prioridad sobre `config.txt`:
+
+| Variable | Qué hace |
+|---|---|
+| `BOT_TOKEN` | Token del bot |
+| `OWNER_ID` | Tu ID de usuario de Discord |
+| `TWITCH_CLIENT_ID` · `TWITCH_CLIENT_SECRET` | Credenciales para los avisos de Twitch |
+| `TUKIBOT_AUTOUPDATE` | `false` para desactivar la actualización automática |
+
+## Avisos de Twitch
+
+1. Crea una aplicación gratis en [dev.twitch.tv/console/apps](https://dev.twitch.tv/console/apps) (OAuth Redirect URL: `http://localhost`, categoría *Chat Bot*), copia el **Client ID** y genera un **Client Secret**.
+2. Ponlos en `config.txt`:
+   ```
+   twitch = "tu_canal"
+   twitchnotify {
+     clientid = "..."
+     clientsecret = "..."
+   }
+   ```
+3. En cada servidor, un admin usa `/config twitch canal:#anuncios rol:@Directos` (el rol es opcional).
+
+El bot revisa cada minuto y avisa una sola vez por directo, con la miniatura, el título, el juego y un botón para verlo.
+
 ## YouTube
 
 YouTube cambia sus protecciones contra bots casi cada semana, así que TukiBot usa varias capas:
@@ -99,6 +140,9 @@ src/main/java/com/itstuki/tukibot/
   ui/Panels.java        paneles Components V2
   ytdlp/                reproducción de YouTube con yt-dlp
   spotify/              enlaces de Spotify (se reproducen desde YouTube)
+  userplaylist/         playlists personales (userplaylists.json)
+  twitch/               avisos de directos con la API de Twitch
+  update/               actualización automática desde GitHub
   fun/BotLogic.java     gen_pass y flip_coin del bot original
   lyrics/               cliente de LRCLIB
   queue/, playlist/, settings/, utils/, gui/   (heredados de JMusicBot)

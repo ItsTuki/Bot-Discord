@@ -51,7 +51,9 @@ public class YtDlpAudioTrack extends DelegatedAudioTrack
         YtDlpDownload download;
         try
         {
-            download = sourceManager.getYtDlp().download(trackInfo.uri);
+            download = sourceManager.getYtDlp().takePrefetched(trackInfo.uri);
+            if(download == null)
+                download = sourceManager.getYtDlp().download(trackInfo.uri);
             download.awaitStart(60_000);
         }
         catch(Exception e)
@@ -73,7 +75,7 @@ public class YtDlpAudioTrack extends DelegatedAudioTrack
             return;
         }
 
-        try(download)
+        try(YtDlpDownload active = download)
         {
             String ext = download.getExt();
             InternalAudioTrack delegate = "webm".equalsIgnoreCase(ext) || "weba".equalsIgnoreCase(ext) || "mkv".equalsIgnoreCase(ext)

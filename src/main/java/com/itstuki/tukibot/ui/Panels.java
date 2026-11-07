@@ -61,7 +61,12 @@ public final class Panels
 
     public static MessageCreateData container(Bot bot, Guild guild, List<? extends ContainerChildComponent> children)
     {
-        Container container = Container.of(children).withAccentColor(accent(bot, guild));
+        return container(bot, guild, children, accent(bot, guild));
+    }
+
+    public static MessageCreateData container(Bot bot, Guild guild, List<? extends ContainerChildComponent> children, Color color)
+    {
+        Container container = Container.of(children).withAccentColor(color);
         return new MessageCreateBuilder().useComponentsV2().setComponents(container).build();
     }
 
@@ -119,6 +124,10 @@ public final class Panels
             footer.append(" · Siguiente: ").append(FormatUtil.escape(FormatUtil.truncate(handler.getQueue().get(0).getTrack().getInfo().title, 60)));
         if(settings.getRepeatMode() != RepeatMode.OFF)
             footer.append(" · ").append(settings.getRepeatMode().getEmoji()).append(" ").append(settings.getRepeatMode().getUserFriendlyName());
+        if(settings.isAutoplay())
+            footer.append(" · 📻 Autoplay");
+        if(handler.getFilter() != com.itstuki.tukibot.audio.AudioFilter.OFF)
+            footer.append(" · ").append(handler.getFilter().getEmoji()).append(" ").append(handler.getFilter().getLabel());
         children.add(TextDisplay.of(footer.toString()));
 
         boolean paused = handler.getPlayer().isPaused();
@@ -135,7 +144,9 @@ public final class Panels
                 Button.secondary("np:voldown", Emoji.fromUnicode("🔉")),
                 Button.secondary("np:volup", Emoji.fromUnicode("🔊")),
                 Button.secondary("np:queue", "Cola").withEmoji(Emoji.fromUnicode("📜")),
-                Button.secondary("np:lyrics", "Letra").withEmoji(Emoji.fromUnicode("🎤"))));
+                Button.secondary("np:lyrics", "Letra").withEmoji(Emoji.fromUnicode("🎤")),
+                (settings.isAutoplay() ? Button.success("np:autoplay", "Autoplay") : Button.secondary("np:autoplay", "Autoplay"))
+                        .withEmoji(Emoji.fromUnicode("📻"))));
 
         return container(bot, guild, children);
     }

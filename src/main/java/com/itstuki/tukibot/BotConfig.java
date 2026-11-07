@@ -40,6 +40,9 @@ public class BotConfig
     private final static String END_TOKEN = "/// END OF TUKIBOT CONFIG ///";
 
     private Path path = null;
+    private String twitchClientId = "", twitchClientSecret = "";
+    private int twitchInterval = 60;
+    private boolean autoUpdate = true, tokenFromEnv = false;
     private String token, playlistsFolder, logLevel, twitch,
             successEmoji, warningEmoji, errorEmoji, loadingEmoji, searchingEmoji,
             ytRefreshToken, ytRemoteCipher, ytRemoteCipherPassword, ytdlpPath, ytCookies, ytCookiesBrowser;
@@ -105,6 +108,30 @@ public class BotConfig
             ytdlpPath = config.getString("youtube.ytdlppath").trim();
             ytCookies = config.getString("youtube.cookies").trim();
             ytCookiesBrowser = config.getString("youtube.cookiesfrombrowser").trim();
+            twitchClientId = config.getString("twitchnotify.clientid").trim();
+            twitchClientSecret = config.getString("twitchnotify.clientsecret").trim();
+            twitchInterval = Math.max(30, config.getInt("twitchnotify.interval"));
+            autoUpdate = config.getBoolean("autoupdate");
+
+            // Variables de entorno (Pterodactyl, Docker...): tienen prioridad sobre config.txt
+            String envToken = env("BOT_TOKEN", "TUKIBOT_TOKEN");
+            if(envToken != null)
+            {
+                token = envToken;
+                tokenFromEnv = true;
+            }
+            String envOwner = env("OWNER_ID", "TUKIBOT_OWNER");
+            if(envOwner != null)
+                try { owner = Long.parseLong(envOwner); } catch(NumberFormatException ignored) {}
+            String envTwitchId = env("TWITCH_CLIENT_ID");
+            if(envTwitchId != null)
+                twitchClientId = envTwitchId;
+            String envTwitchSecret = env("TWITCH_CLIENT_SECRET");
+            if(envTwitchSecret != null)
+                twitchClientSecret = envTwitchSecret;
+            String envUpdate = env("TUKIBOT_AUTOUPDATE");
+            if(envUpdate != null)
+                autoUpdate = !envUpdate.equalsIgnoreCase("false") && !envUpdate.equals("0");
 
             boolean write = false;
 
@@ -132,6 +159,18 @@ public class BotConfig
         {
             prompt.alert(Prompt.Level.ERROR, CONTEXT, ex + ": " + ex.getMessage() + "\n\nArchivo de configuración: " + path.toAbsolutePath());
         }
+    }
+
+    /** Primera variable de entorno definida y no vacía, o null. */
+    private static String env(String... names)
+    {
+        for(String n : names)
+        {
+            String v = System.getenv(n);
+            if(v != null && !v.isBlank())
+                return v.trim();
+        }
+        return null;
     }
 
     private static Color parseColor(String value)
@@ -237,6 +276,12 @@ public class BotConfig
     public boolean useAutocomplete() { return autocomplete; }
     public boolean useTextResponses() { return textResponses; }
     public String getTwitch() { return twitch; }
+    public String getTwitchClientId() { return twitchClientId; }
+    public String getTwitchClientSecret() { return twitchClientSecret; }
+    public int getTwitchInterval() { return twitchInterval; }
+    public boolean useTwitchNotify() { return !twitch.isEmpty() && !twitchClientId.isEmpty() && !twitchClientSecret.isEmpty(); }
+    public boolean useAutoUpdate() { return autoUpdate; }
+    public boolean isTokenFromEnv() { return tokenFromEnv; }
     public long getDevGuild() { return devGuild; }
     public Color getColor() { return color; }
     public String getPlaylistsFolder() { return playlistsFolder; }

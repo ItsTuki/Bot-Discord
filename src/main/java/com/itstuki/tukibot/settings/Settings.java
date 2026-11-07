@@ -36,6 +36,9 @@ public class Settings
     private RepeatMode repeatMode;
     private QueueType queueType;
     private double skipRatio;
+    private boolean autoplay = false;
+    private long twitchChannelId = 0L;
+    private long twitchRoleId = 0L;
 
     public Settings(SettingsManager manager, String textId, String voiceId, String roleId, int volume, String defaultPlaylist, RepeatMode repeatMode, double skipRatio, QueueType queueType)
     {
@@ -84,6 +87,42 @@ public class Settings
         this.queueType = queueType;
     }
     
+    /** Carga los campos nuevos sin volver a escribir el archivo. */
+    void loadExtras(boolean autoplay, long twitchChannelId, long twitchRoleId)
+    {
+        this.autoplay = autoplay;
+        this.twitchChannelId = twitchChannelId;
+        this.twitchRoleId = twitchRoleId;
+    }
+
+    public boolean isAutoplay()
+    {
+        return autoplay;
+    }
+
+    public void setAutoplay(boolean autoplay)
+    {
+        this.autoplay = autoplay;
+        this.manager.writeSettings();
+    }
+
+    public long getTwitchChannelId()
+    {
+        return twitchChannelId;
+    }
+
+    public long getTwitchRoleId()
+    {
+        return twitchRoleId;
+    }
+
+    public void setTwitchNotify(long channelId, long roleId)
+    {
+        this.twitchChannelId = channelId;
+        this.twitchRoleId = roleId;
+        this.manager.writeSettings();
+    }
+
     // Getters
     public TextChannel getTextChannel(Guild guild)
     {

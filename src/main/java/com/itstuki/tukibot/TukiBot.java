@@ -137,11 +137,13 @@ public class TukiBot
                     .setBulkDeleteSplittingEnabled(true)
                     .build();
             bot.setJDA(jda);
+            Runtime.getRuntime().addShutdownHook(new Thread(bot::cleanup, "tukibot-shutdown"));
             if(config.useTextResponses())
                 jda.addEventListener(new TextResponses(bot));
 
             jda.awaitReady();
             checkApplication(jda, config);
+            bot.startBackgroundTasks();
         }
         catch(InvalidTokenException ex)
         {
@@ -216,6 +218,7 @@ public class TukiBot
                         new ShuffleCmd(bot),
                         new LyricsCmd(bot),
                         new PlaylistCmd(bot),
+                        new MyPlaylistCmd(bot),
                         // DJ
                         new PlaynextCmd(bot),
                         new PauseCmd(bot),
@@ -225,6 +228,8 @@ public class TukiBot
                         new MoveTrackCmd(bot),
                         new ForceRemoveCmd(bot),
                         new RepeatCmd(bot),
+                        new AutoplayCmd(bot),
+                        new FilterCmd(bot),
                         new VolumeCmd(bot),
                         new StopCmd(bot),
                         // admin y dueño

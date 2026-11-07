@@ -127,6 +127,7 @@ public class PanelButtons implements ComponentHandler
             case "repeat" -> PlayerActions.cycleRepeat(settings);
             case "volup" -> PlayerActions.setVolume(handler, settings, handler.getPlayer().getVolume() + 10);
             case "voldown" -> PlayerActions.setVolume(handler, settings, handler.getPlayer().getVolume() - 10);
+            case "autoplay" -> settings.setAutoplay(!settings.isAutoplay());
             default -> {}
         }
         event.editMessage(MessageEditData.fromCreateData(Panels.nowPlaying(bot, guild, handler))).queue();

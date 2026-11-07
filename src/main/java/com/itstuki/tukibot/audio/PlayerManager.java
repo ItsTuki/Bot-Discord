@@ -62,6 +62,7 @@ public class PlayerManager extends DefaultAudioPlayerManager
     private final Map<String, CachedSearch> searchCache = new ConcurrentHashMap<>();
     private YoutubeAudioSourceManager youtube;
     private YtDlpSourceManager ytdlp;
+    private SpotifySourceManager spotify;
 
     public PlayerManager(Bot bot)
     {
@@ -73,7 +74,8 @@ public class PlayerManager extends DefaultAudioPlayerManager
         BotConfig config = bot.getConfig();
         TransformativeAudioSourceManager.createTransforms(config.getTransforms()).forEach(this::registerSourceManager);
 
-        registerSourceManager(new SpotifySourceManager(this));
+        spotify = new SpotifySourceManager(this);
+        registerSourceManager(spotify);
 
         youtube = createYoutubeSource(config);
         registerSourceManager(youtube);
@@ -176,6 +178,43 @@ public class PlayerManager extends DefaultAudioPlayerManager
             return wrapped;
         }
         return track;
+    }
+
+    /** Precarga una pista que viene en la cola (YouTube con yt-dlp, o Spotify ya buscado en YouTube). */
+    public void prefetch(AudioTrack track)
+    {
+        if(track == null || ytdlp == null || !ytdlp.getYtDlp().isReady())
+            return;
+        if(track instanceof com.itstuki.tukibot.ytdlp.YtDlpAudioTrack)
+            ytdlp.getYtDlp().prefetch(track.getInfo().uri);
+        else if(track instanceof com.itstuki.tukibot.spotify.SpotifyMirrorTrack mirror)
+            Thread.ofVirtual().start(() -> {
+                try
+                {
+                    AudioTrack match = spotify.findMatch(mirror);
+                    if(match.getSourceManager() == youtube)
+                        ytdlp.getYtDlp().prefetch(match.getInfo().uri);
+                }
+                catch(Exception ignored) {}
+            });
+    }
+
+    /** ID de YouTube de una pista (sirve de semilla para el autoplay). */
+    public String youtubeId(AudioTrack track)
+    {
+        if(track == null)
+            return null;
+        if(track.getSourceManager() == youtube || track instanceof com.itstuki.tukibot.ytdlp.YtDlpAudioTrack)
+            return track.getIdentifier();
+        if(track instanceof com.itstuki.tukibot.spotify.SpotifyMirrorTrack)
+            return spotify.getMatchedYoutubeId(track.getIdentifier());
+        return null;
+    }
+
+    public void shutdownExtras()
+    {
+        if(ytdlp != null)
+            ytdlp.getYtDlp().shutdown();
     }
 
     public boolean hasHandler(Guild guild)

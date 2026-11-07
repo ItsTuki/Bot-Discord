@@ -26,6 +26,7 @@ import com.itstuki.tukibot.lyrics.LyricsClient;
 import com.itstuki.tukibot.playlist.PlaylistLoader;
 import com.itstuki.tukibot.settings.SettingsManager;
 import com.itstuki.tukibot.utils.InteractionCache;
+import com.itstuki.tukibot.utils.OwnerAlerts;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -49,6 +50,10 @@ public class Bot
     private final AloneInVoiceHandler aloneInVoiceHandler;
     private final InteractionCache cache;
     private final LyricsClient lyrics;
+    private final OwnerAlerts alerts;
+    private final com.itstuki.tukibot.userplaylist.UserPlaylists userPlaylists;
+    private final com.itstuki.tukibot.twitch.TwitchNotifier twitch;
+    private final com.itstuki.tukibot.update.Updater updater;
     private CommandManager commands;
 
     private volatile boolean shuttingDown = false;
@@ -67,6 +72,10 @@ public class Bot
         });
         this.cache = new InteractionCache(threadpool);
         this.lyrics = new LyricsClient();
+        this.alerts = new OwnerAlerts(this);
+        this.userPlaylists = new com.itstuki.tukibot.userplaylist.UserPlaylists();
+        this.twitch = new com.itstuki.tukibot.twitch.TwitchNotifier(this);
+        this.updater = new com.itstuki.tukibot.update.Updater(this);
         this.players = new PlayerManager(this);
         this.players.init();
         this.nowplaying = new NowplayingHandler(this);
@@ -84,6 +93,16 @@ public class Bot
     public AloneInVoiceHandler getAloneInVoiceHandler() { return aloneInVoiceHandler; }
     public InteractionCache getCache() { return cache; }
     public LyricsClient getLyrics() { return lyrics; }
+    public OwnerAlerts getAlerts() { return alerts; }
+    public com.itstuki.tukibot.userplaylist.UserPlaylists getUserPlaylists() { return userPlaylists; }
+    public com.itstuki.tukibot.twitch.TwitchNotifier getTwitch() { return twitch; }
+
+    /** Tareas que necesitan JDA conectado (avisos de Twitch, actualizaciones). */
+    public void startBackgroundTasks()
+    {
+        twitch.start();
+        updater.start();
+    }
     public CommandManager getCommands() { return commands; }
     public void setCommands(CommandManager commands) { this.commands = commands; }
     public JDA getJDA() { return jda; }
@@ -114,6 +133,20 @@ public class Bot
 
     public void shutdown()
     {
+        // si ya se está apagando (por ejemplo desde el hook de Ctrl+C), no se
+        // llama a System.exit otra vez: dentro del apagado bloquearía la JVM
+        boolean first = !shuttingDown;
+        cleanup();
+        if(first)
+            System.exit(0);
+    }
+
+    /**
+     * Deja todo ordenado antes de apagar (también se llama desde el hook de
+     * apagado, por ejemplo con Ctrl+C o el botón Stop de Pterodactyl).
+     */
+    public synchronized void cleanup()
+    {
         if(shuttingDown)
             return;
         shuttingDown = true;
@@ -132,9 +165,11 @@ public class Bot
             });
             jda.shutdown();
         }
+        if(players != null)
+            players.shutdownExtras();
         if(gui!=null)
             gui.dispose();
-        System.exit(0);
+        com.itstuki.tukibot.update.Updater.applyPending();
     }
 
     public void setJDA(JDA jda) { this.jda = jda; }
