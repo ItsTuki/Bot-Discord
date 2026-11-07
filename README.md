@@ -97,6 +97,11 @@ src/main/java/com/itstuki/tukibot/
   queue/, playlist/, settings/, utils/, gui/   (heredados de JMusicBot)
 ```
 
+## Términos y privacidad
+
+- [Términos del Servicio](docs/terminos.md)
+- [Política de Privacidad](docs/privacidad.md)
+
 ## Créditos y licencia
 
 Basado en [JMusicBot](https://github.com/jagrosh/MusicBot) de John Grosh (jagrosh) y sus contribuidores, bajo la [Licencia Apache 2.0](LICENSE). Los cambios están descritos en [NOTICE](NOTICE).
